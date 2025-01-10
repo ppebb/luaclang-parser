@@ -1,0 +1,15 @@
+BasedOnStyle: LLVM
+AlignAfterOpenBracket: "BlockIndent"
+AlignArrayOfStructures: "Left"
+AllowShortFunctionsOnASingleLine: false
+BreakBeforeBraces: "Custom"
+BraceWrapping:
+  BeforeElse: true
+IndentWidth: 4
+LineEnding: "LF"
+MaxEmptyLinesToKeep: 1
+ReflowComments: true
+RemoveBracesLLVM: true
+RemoveParentheses: "MultipleParentheses"
+RemoveSemicolon: true
+SortIncludes: "CaseInsensitive"
