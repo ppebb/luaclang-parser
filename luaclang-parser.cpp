@@ -759,6 +759,12 @@ static int l_definition(lua_State *L) {
     return 1;
 }
 
+static int l_isDefinition(lua_State *L) {
+    CXCursor cur = toCursor(L, 1);
+    lua_pushinteger(L, clang_isCursorDefinition(cur));
+    return 1;
+}
+
 static int l_isStatic(lua_State *L) {
     CXCursor cur = toCursor(L, 1);
     lua_pushboolean(L, clang_CXXMethod_isStatic(cur));
@@ -807,6 +813,7 @@ static luaL_Reg cursor_functions[] = {
     {"usr",               l_usr              },
     {"referenced",        l_referenced       },
     {"definition",        l_definition       },
+    {"isDefinition",      l_isDefinition     },
     {"isStatic",          l_isStatic         },
     {"isVirtual",         l_isVirtual        },
     {"isFunctionInlined", l_isFunctionInlined},
@@ -899,6 +906,15 @@ static int l_getArrayElementType(lua_State *L) {
     return 1;
 }
 
+static int l_getNamedType(lua_State *L) {
+    CXType type = toType(L, 1);
+    CXType *res = newType(L);
+    *res = clang_Type_getNamedType(type);
+    if (res == NULL)
+        lua_pushnil(L);
+    return 1;
+}
+
 static luaL_Reg type_functions[] = {
     {"__tostring",             l_typeToString          },
     {"name",                   l_typeToString          },
@@ -909,6 +925,7 @@ static luaL_Reg type_functions[] = {
     {"isFunctionTypeVariadic", l_isFunctionTypeVariadic},
     {"getArraySize",           l_getArraySize          },
     {"getArrayElementType",    l_getArrayElementType   },
+    {"getNamedType",           l_getNamedType          },
     {"declaration",            l_declaration           },
     {"__eq",                   l_typeEq                },
     {NULL,                     NULL                    }
