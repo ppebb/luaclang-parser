@@ -1,5 +1,8 @@
 #include <clang-c/CXErrorCode.h>
 #include <clang-c/Index.h>
+#include <clang/AST/Decl.h>
+#include <clang/AST/DeclBase.h>
+#include <llvm/Support/Casting.h>
 #include <lua.hpp>
 
 #define LCM_INDEX "ClangIndex"
@@ -771,6 +774,19 @@ static int l_isStatic(lua_State *L) {
     return 1;
 }
 
+static int l_isNoReturn(lua_State *L) {
+    CXCursor cur = toCursor(L, 1);
+    const clang::Decl *decl = static_cast<const clang::Decl *>(cur.data[0]);
+    if (const clang::FunctionDecl *fd =
+            llvm::dyn_cast_or_null<clang::FunctionDecl>(decl))
+        lua_pushboolean(L, fd->isNoReturn());
+
+    else
+        lua_pushboolean(L, 0);
+
+    return 1;
+}
+
 static int l_isVirtual(lua_State *L) {
     CXCursor cur = toCursor(L, 1);
     lua_pushboolean(L, clang_CXXMethod_isVirtual(cur));
@@ -815,6 +831,7 @@ static luaL_Reg cursor_functions[] = {
     {"definition",        l_definition       },
     {"isDefinition",      l_isDefinition     },
     {"isStatic",          l_isStatic         },
+    {"isNoReturn",        l_isNoReturn       },
     {"isVirtual",         l_isVirtual        },
     {"isFunctionInlined", l_isFunctionInlined},
     {"resultType",        l_resultType       },
@@ -883,6 +900,18 @@ static int l_isConst(lua_State *L) {
     return 1;
 }
 
+static int l_isVolatile(lua_State *L) {
+    CXType type = toType(L, 1);
+    lua_pushboolean(L, clang_isVolatileQualifiedType(type));
+    return 1;
+}
+
+static int l_isRestrict(lua_State *L) {
+    CXType type = toType(L, 1);
+    lua_pushboolean(L, clang_isRestrictQualifiedType(type));
+    return 1;
+}
+
 static int l_isFunctionTypeVariadic(lua_State *L) {
     CXType type = toType(L, 1);
     int isVar = clang_isFunctionTypeVariadic(type);
@@ -922,6 +951,8 @@ static luaL_Reg type_functions[] = {
     {"pointee",                l_pointee               },
     {"isPod",                  l_isPod                 },
     {"isConst",                l_isConst               },
+    {"isVolatile",             l_isVolatile            },
+    {"isRestrict",             l_isRestrict            },
     {"isFunctionTypeVariadic", l_isFunctionTypeVariadic},
     {"getArraySize",           l_getArraySize          },
     {"getArrayElementType",    l_getArrayElementType   },
