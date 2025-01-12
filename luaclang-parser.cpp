@@ -774,6 +774,19 @@ static int l_isStatic(lua_State *L) {
     return 1;
 }
 
+static int l_isExternC(lua_State *L) {
+    CXCursor cur = toCursor(L, 1);
+    const clang::Decl *decl = static_cast<const clang::Decl *>(cur.data[0]);
+    if (const clang::FunctionDecl *fd =
+            llvm::dyn_cast_or_null<clang::FunctionDecl>(decl))
+        lua_pushboolean(L, fd->isExternC());
+
+    else
+        lua_pushboolean(L, 0);
+
+    return 1;
+}
+
 static int l_isNoReturn(lua_State *L) {
     CXCursor cur = toCursor(L, 1);
     const clang::Decl *decl = static_cast<const clang::Decl *>(cur.data[0]);
@@ -831,6 +844,7 @@ static luaL_Reg cursor_functions[] = {
     {"definition",        l_definition       },
     {"isDefinition",      l_isDefinition     },
     {"isStatic",          l_isStatic         },
+    {"isExternC",         l_isExternC        },
     {"isNoReturn",        l_isNoReturn       },
     {"isVirtual",         l_isVirtual        },
     {"isFunctionInlined", l_isFunctionInlined},
